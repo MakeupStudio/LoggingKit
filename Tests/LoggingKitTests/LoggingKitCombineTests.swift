@@ -12,17 +12,10 @@ final class LoggingKitCombineTests: XCTestCase {
     
     override func setUp() {
         #if canImport(Combine)
-        if !isLoggingConfigured {
-            let box = LoggingSystem.bootstrap()
-            box.publisher.sink { $0.map { $0.dump(to: .standardOutput) } }.store(in: &subscriptions)
-            
-            isLoggingConfigured = true
-        } else {
-            let _box = box
-            LoggingSystem.bootstrapInternal { label in
-                BoxLogHandler(label: label, output: _box)
-            }
-        }
+        let box = LoggingSystem._bootstrap()
+        box.publisher
+            .sink { $0.map { $0.dump(to: .standardOutput) } }
+            .store(in: &subscriptions)
         #endif
     }
     

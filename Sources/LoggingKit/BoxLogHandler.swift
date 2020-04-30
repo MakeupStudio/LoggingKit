@@ -11,7 +11,7 @@ struct BoxLogHandler<Buffer: LogOutputStream>: Logging.LogHandler {
     let label: String
     var metadata: Logger.Metadata
     var logLevel: Logger.Level
-    var output: Box<Buffer>?
+    var output: Box<Buffer>
     
     private let lock = Lock()
     
@@ -19,7 +19,7 @@ struct BoxLogHandler<Buffer: LogOutputStream>: Logging.LogHandler {
         label: String,
         metadata: Logger.Metadata = [:],
         logLevel: Logger.Level = .info,
-        output: Box<Buffer>? = .none
+        output: Box<Buffer>
     ) {
         self.label = label
         self.metadata = metadata
@@ -47,7 +47,7 @@ struct BoxLogHandler<Buffer: LogOutputStream>: Logging.LogHandler {
             line: line
         )
         lock.withLock {
-            output.map { $0.content.write(log) }
+            output.content.write(log)
         }
     }
     

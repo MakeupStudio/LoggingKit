@@ -1,12 +1,11 @@
 # LoggingKit
 
-Simple logging kit written in Swift.
+Simple logging kit written in Swift, based on [apple/swift-log](https://github.com/apple/swift-log) framework.
 
 ## Usage
 
 1. Bootstrap logging system globally
 
-Simple way:
 ```swift
 // AppDelegate.swift
 import LoggingKit
@@ -21,60 +20,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // ...
 }
 ```
-Better way:
-```swift
-// AppDelegate.swift
-import Combine
-import LoggingKit
-import UIKit
-
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    private var loggerSubscription: AnyCancellable?
-    static let internalFolder: URL? = {
-        FileManager.default
-            .urls(for: .documentDirectory, in: .userDomainMask)
-            .first.map { $0.appendingPathComponent(".internal") }
-    }()
-    static let logsFileURL: URL? { 
-        internalFolder
-        .appendingPathComponent(".logs") 
-    }
-    
-    func bootstrapLoggingSystem() {
-        do {
-            try Self.internalFolder
-                .map { url in
-                    try FileManager.default.createDirectory(
-                        at: url, withIntermediateDirectories: true,
-                        attributes: nil
-                    )
-            }
-            Self.logsFileURL
-                .map { url in 
-                    let box = Box<Log?>()
-                    loggerSubscription = LoggingSystem.bootstrap(level: .info, output: box)
-                    box.publisher.sink { log in
-                        log.dump(to: FileHandle(forWritingTo: url))
-                        
-                        #if DEBUG
-                        log.prettyPrint(to: .standardOutput)
-                        // Or use any Encoder if you want to, just do anything you want.
-                        #endif
-                    }
-            }
-        } catch {
-            // logs file could not be created
-        }
-    }
-    
-    func application(..., didFinishLaunchingWithOptions...) -> Bool {
-        bootstrapLoggingSystem()
-    }
-    
-}
-```
-
 2. Passthrough convenience types
 
 ```swift
@@ -93,7 +38,7 @@ class ProfileViewModel: Loggable {
     func logout() {
         userManager.logout(
             onSuccess: { [weak self] in
-            self?.coordinator.go(to: .signIn)
+                self?.coordinator.go(to: .signIn)
                 Self.logger.trace("User signed out.")
             }, 
             onFailure: { [weak self] error in
@@ -106,10 +51,23 @@ class ProfileViewModel: Loggable {
 
 4. Grab logs
 
-For simple bootstrap
-
 ```swift
 class LoggingViewModel {
     var logs: [Log] { AppDelegate.logs.content }
 }
 ```
+
+5. See  **[Examples](./Examples)** for more.
+
+## Installation
+
+Add the package to Your SwiftPM package dependencies:
+
+```swift
+.package(
+    url: "https://github.com/MakeupStudio/LoggingKit.git", 
+    .upToNextMajor(from: "1.0.0-beta.1.1")
+)
+```
+
+then add `LoggingKit` dependency to your target.

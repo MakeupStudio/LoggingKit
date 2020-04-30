@@ -6,15 +6,7 @@ final class LoggingKitDefaultTests: XCTestCase {
     let box = Box<[Log]>()
     
     override func setUp() {
-        if !isLoggingConfigured {
-            LoggingSystem.bootstrap(output: box)
-            isLoggingConfigured = true
-        } else {
-            let _box = box
-            LoggingSystem.bootstrapInternal { label in
-                BoxLogHandler(label: label, output: _box)
-            }
-        }
+        LoggingSystem._bootstrap(output: box)
     }
     
     func preformLogging(with logger: Logger) {

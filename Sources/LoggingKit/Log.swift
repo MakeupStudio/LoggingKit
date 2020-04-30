@@ -38,10 +38,18 @@ extension Log: Hashable {
     }
 }
 
+extension Log: LogOutputStreamable {
+    public func write<Target>(to target: inout Target) where Target : LogOutputStream { target.write(self) }
+}
+
 extension Log {
     public func dump() -> String { LoggingKit.dump(object: self) }
     public func dump<Target: TextOutputStream>(to target: inout Target) { target.write(dump()) }
     public func dump(to handle: FileHandle) { dump().data(using: .utf8).map(handle.write) }
+    
+    public func prettyPrint() -> String { description(for: self) }
+    public func prettyPrint(to handle: FileHandle) { prettyPrint().data(using: .utf8).map(handle.write) }
+    public func prettyPrint<Target: TextOutputStream>(to target: inout Target) { target.write(prettyPrint()) }
 }
 
 public func description(for log: Log) -> String {
@@ -68,12 +76,12 @@ private func getMetadataIfPresent(
 ) -> String {
     var output = ""
     if !handlerMetadata.isEmpty {
-        output.append("\n# logger.metadata\n")
+        output.append("\n# logger.metadata:\n")
         output.append(Logger.Message.dump(handlerMetadata).description)
     }
     
     if let metadata = logMetadata {
-        output.append("\n# logging.metadata\n")
+        output.append("\n# logging.metadata:\n")
         output.append(Logger.Message.dump(metadata).description)
     }
     
