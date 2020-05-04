@@ -1,4 +1,6 @@
-# LoggingKit
+<p align="center">
+  <img src="Assets/LoggingKit-Logo-Pink.png" width=100%/>
+</p>
 
 Simple logging kit written in Swift, based on [apple/swift-log](https://github.com/apple/swift-log) framework.
 
